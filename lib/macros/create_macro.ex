@@ -24,22 +24,21 @@ defmodule PhxCrud.CreateRecord do
       def create(conn, %{@singular => params}) do
         changeset = @phx_model.changeset(struct(@phx_model), params)
 
-        if changeset.valid? do
-          with {:ok, record} <- @repo.insert(changeset) do
-            conn
-            |> put_status(:created)
-            |> render(@view, :show, record: record)
-          end
-        else
+        with {:ok, record} <- @repo.insert(changeset) do
           conn
-          |> put_status(422)
-          |> render(
-            @error_view,
-            :errors,
-            code: 422,
-            message: "Invalid changeset",
-            changeset: changeset
-          )
+          |> put_status(:created)
+          |> render(@view, :show, record: record)
+        else
+          {:error, changeset} ->
+            conn
+            |> put_status(422)
+            |> render(
+              @error_view,
+              :errors,
+              code: 422,
+              message: "Invalid changeset",
+              changeset: changeset
+            )
         end
       end
 
