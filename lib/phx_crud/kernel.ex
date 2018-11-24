@@ -13,6 +13,9 @@ defmodule PhxCrud.Kernel do
 
       @model String.to_atom(@module)
 
+      @view (@module <> "View")
+            |> String.to_atom()
+
       @singular @options[:singular] ||
                   @module |> String.split(".") |> List.last() |> Macro.underscore()
     end

@@ -1,10 +1,16 @@
-defmodule Utils.Map do
+defmodule PhxCrud.Utils.Map do
+  def sanitize_map(records) when is_list(records) do
+    Enum.reduce(records, [], fn rec, acc ->
+      acc ++ [sanitize_map(rec)]
+    end)
+  end
+
   def sanitize_map(record) do
     schema_keys = [:__struct__, :__meta__]
 
     Enum.reduce(Map.drop(record, schema_keys), %{}, fn {k, v}, acc ->
       cond do
-        Ecto.assoc_loaded?(v) && is_list(v) && List.first(v) &&
+        Ecto.assoc_loaded?(v) && is_list(v) && List.first(v) && is_map(List.first(v)) &&
             Enum.all?(schema_keys, &Map.has_key?(List.first(v), &1)) ->
           values =
             Enum.reduce(v, [], fn rec, acc ->

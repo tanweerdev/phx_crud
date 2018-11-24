@@ -1,42 +1,42 @@
 defmodule PhxCrud.UpdateRecord do
   defmacro __using__(options \\ []) do
-    quote do
+    quote location: :keep do
       @options unquote(options)
-      @phx_model @options[:model] || @model
-      @repo @options[:repo] || Application.get_env(:phx_crud, :repo)
-      @error_view @options[:error_view] || Application.get_env(:phx_crud, :error_view)
-      @view @options[:view] || Application.get_env(:phx_crud, :view)
+      @phx_crud_model @options[:model] || @model
+      @phx_crud_repo @options[:repo] || Application.get_env(:phx_crud, :repo)
+      @phx_crud_error_view @options[:error_view] || Application.get_env(:phx_crud, :error_view)
+      @phx_crud_view @options[:view] || @view
 
-      if !@repo do
+      if !@phx_crud_repo do
         raise "Please specify phx_crud Repo in config or while calling this macro"
       end
 
-      if !@error_view do
+      if !@phx_crud_error_view do
         raise "Please specify phx_crud error_view in config or while calling this macro"
       end
 
-      if !@view do
+      if !@phx_crud_view do
         raise "Please specify phx_crud view in config or while calling this macro"
       end
 
       def update(conn, %{"id" => id, @singular => params}) do
-        with record <- @repo.get(@phx_model, id),
+        with record <- @phx_crud_repo.get(@phx_crud_model, id),
              true <- record != nil,
-             changeset = @phx_model.changeset(record, params),
+             changeset = @phx_crud_model.changeset(record, params),
              #  true <- changeset.valid?,
-             {:ok, record} <- @repo.update(changeset) do
-          render(conn, @view, :show, record: record)
+             {:ok, record} <- @phx_crud_repo.update(changeset) do
+          render(conn, @phx_crud_view, :show, record: record)
         else
           false ->
             conn
             |> put_status(404)
-            |> render(@error_view, :error, code: 404, message: "Record not found")
+            |> render(@phx_crud_error_view, :error, code: 404, message: "Record not found")
 
           {:error, changeset} ->
             conn
             |> put_status(422)
             |> render(
-              @error_view,
+              @phx_crud_error_view,
               :errors,
               code: 422,
               message: "Invalid Changeset",
