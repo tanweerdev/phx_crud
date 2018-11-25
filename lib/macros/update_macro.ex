@@ -6,6 +6,7 @@ defmodule PhxCrud.UpdateRecord do
       @phx_crud_repo @options[:repo] || Application.get_env(:phx_crud, :repo)
       @phx_crud_error_view @options[:error_view] || Application.get_env(:phx_crud, :error_view)
       @phx_crud_view @options[:view] || @view
+      @view_wrapper @options[:view_wrapper] || @singular
 
       if !@phx_crud_repo do
         raise "Please specify phx_crud Repo in config or while calling this macro"
@@ -19,7 +20,7 @@ defmodule PhxCrud.UpdateRecord do
         raise "Please specify phx_crud view in config or while calling this macro"
       end
 
-      def update(conn, %{"id" => id, @singular => params}) do
+      def update(conn, %{"id" => id, @view_wrapper => params}) do
         with record <- @phx_crud_repo.get(@phx_crud_model, id),
              true <- record != nil,
              changeset = @phx_crud_model.changeset(record, params),
